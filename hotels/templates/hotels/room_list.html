@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Rooms at {{ rooms.0.hotel.name }}</h1>
+<ul>
+    {% for room in rooms %}
+    <li>
+        <h2>{{ room.get_room_type_display }} #{{ room.room_number }}</h2>
+        <p>Capacity: {{ room.capacity }}</p>
+        <p>Price per night: ${{ room.price_per_night }}</p>
+        {% if room.is_available %}
+            <p style="color: green;">Available</p>
+        {% else %}
+            <p style="color: red;">Not Available</p>
+        {% endif %}
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}
