@@ -20,8 +20,8 @@ class BookingForm(forms.ModelForm):
 
         if check_in and check_out:
             if check_in < timezone.now().date():
-                raise ValidationError("Дата заїзду не може бути в минулому")
+                raise ValidationError("The check-in date cannot be in the past.")
             if check_out <= check_in:
-                raise ValidationError("Дата виїзду повинна бути після дати заїзду")
+                raise ValidationError("The departure date must be after the arrival date.")
 
         return cleaned_data

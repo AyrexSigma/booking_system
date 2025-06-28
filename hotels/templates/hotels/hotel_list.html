@@ -1,17 +1,26 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>Hotel list</h1>
-<div class="hotels-list">
+<div class="row">
+    <h1 class="mb-4">Available Hotels</h1>
+
     {% for hotel in hotels %}
-    <div class="hotel-card">
-        <h2>{{ hotel.name }}</h2>
-        <p>Rating: {{ hotel.stars }} ★</p>
-        <p>{{ hotel.address }}</p>
-        <p>{{ hotel.description|truncatewords:30 }}</p>
-        <a href="{% url 'hotels:room_detail' hotel.rooms.first.id %}" class="btn">
-            Check rooms
-        </a>
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <img src="https://via.placeholder.com/300x200?text={{ hotel.name }}" class="card-img-top" alt="{{ hotel.name }}">
+            <div class="card-body">
+                <h5 class="card-title">{{ hotel.name }}</h5>
+                <div class="mb-2">
+                    {% for i in "12345" %}
+                        {% if forloop.counter <= hotel.stars %}★{% else %}☆{% endif %}
+                    {% endfor %}
+                </div>
+                <p class="card-text">{{ hotel.description|truncatewords:20 }}</p>
+                <a href="{% url 'hotels:room_detail' hotel.rooms.first.id %}" class="btn btn-primary">
+                    View Rooms
+                </a>
+            </div>
+        </div>
     </div>
     {% endfor %}
 </div>

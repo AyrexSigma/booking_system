@@ -1,25 +1,57 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>{{ room.hotel.name }} - {{ room.get_room_type_display }}</h1>
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h1 class="card-title">{{ room.hotel.name }} - {{ room.get_room_type_display }}</h1>
+                <div class="star-rating mb-3">
+                    {% for i in "12345" %}
+                        {% if forloop.counter <= room.hotel.stars %}★{% else %}☆{% endif %}
+                    {% endfor %}
+                </div>
 
-<div class="room-info">
-    <p>Room number: {{ room.room_number }}</p>
-    <p>Price per night: ${{ room.price_per_night }}</p>
-    <p>Capacity: {{ room.capacity }} persons</p>
-    <p>Features: {{ room.features }}</p>
-</div>
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <p><strong>Room Number:</strong> {{ room.room_number }}</p>
+                        <p><strong>Capacity:</strong> {{ room.capacity }} persons</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Price per night:</strong> ${{ room.price_per_night }}</p>
+                        <p><strong>Status:</strong>
+                            <span class="badge bg-{% if room.is_available %}success{% else %}danger{% endif %}">
+                                {% if room.is_available %}Available{% else %}Booked{% endif %}
+                            </span>
+                        </p>
+                    </div>
+                </div>
 
-{% if user.is_authenticated %}
-<div class="booking-form">
-    <h2>Book a room</h2>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="btn">Confirm the reservation</button>
-    </form>
+                <h4>Features:</h4>
+                <p>{{ room.features }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0">Book This Room</h3>
+            </div>
+            <div class="card-body">
+                {% if user.is_authenticated %}
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit" class="btn btn-primary w-100 mt-3">Confirm Booking</button>
+                </form>
+                {% else %}
+                <div class="alert alert-info">
+                    Please <a href="{% url 'admin:login' %}?next={{ request.path }}">login</a> to book this room.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
 </div>
-{% else %}
-<p>Please, <a href="{% url 'login' %}">login</a>for booking.</p>
-{% endif %}
 {% endblock %}
