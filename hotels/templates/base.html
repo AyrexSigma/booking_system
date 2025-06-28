@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Booking System</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; }
+        ul { list-style: none; padding: 0; }
+        li { margin-bottom: 1rem; padding: 1rem; border: 1px solid #ddd; }
+        a { color: #007bff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="{% url 'hotel_list' %}">Hotels</a> |
+            {% if user.is_authenticated %}
+                <a href="{% url 'booking_list' %}">My Bookings</a> |
+                <a href="{% url 'admin:index' %}">Admin</a> |
+                <a href="{% url 'admin:logout' %}">Logout</a>
+            {% else %}
+                <a href="{% url 'admin:login' %}">Login</a>
+            {% endif %}
+        </nav>
+    </header>
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+</body>
+</html>
