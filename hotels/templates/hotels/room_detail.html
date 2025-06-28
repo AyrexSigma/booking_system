@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{{ room.hotel.name }} - {{ room.get_room_type_display }}</h1>
+
+<div class="room-info">
+    <p>Room number: {{ room.room_number }}</p>
+    <p>Price per night: ${{ room.price_per_night }}</p>
+    <p>Capacity: {{ room.capacity }} persons</p>
+    <p>Features: {{ room.features }}</p>
+</div>
+
+{% if user.is_authenticated %}
+<div class="booking-form">
+    <h2>Book a room</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn">Confirm the reservation</button>
+    </form>
+</div>
+{% else %}
+<p>Please, <a href="{% url 'login' %}">login</a>for booking.</p>
+{% endif %}
+{% endblock %}
