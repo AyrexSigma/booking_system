@@ -14,8 +14,14 @@ class RoomAdmin(admin.ModelAdmin):
     list_filter = ('room_type', 'is_available')
     search_fields = ('room_number', 'hotel__name')
 
+
 @admin.register(Booking)
 class BookingAdmin(admin.ModelAdmin):
-    list_display = ('user', 'room', 'check_in', 'check_out', 'is_confirmed')
-    list_filter = ('is_confirmed', 'check_in', 'check_out')
+    list_display = ('id', 'user', 'room', 'check_in_date', 'check_out_date', 'status', 'is_confirmed_display')
+    list_filter = ('status', 'check_in_date', 'check_out_date')
     search_fields = ('user__username', 'room__room_number')
+    date_hierarchy = 'check_in_date'
+
+    @admin.display(boolean=True, description='Підтверджено?')
+    def is_confirmed_display(self, obj):
+        return obj.status == 'confirmed'

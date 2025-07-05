@@ -3,25 +3,12 @@ from .models import Booking
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 
+
 class BookingForm(forms.ModelForm):
     class Meta:
         model = Booking
-        fields = ['check_in', 'check_out', 'adults', 'children', 'special_requests']
+        fields = ['room', 'check_in_date', 'check_out_date']
         widgets = {
-            'check_in': forms.DateInput(attrs={'type': 'date'}),
-            'check_out': forms.DateInput(attrs={'type': 'date'}),
-            'special_requests': forms.Textarea(attrs={'rows': 3})
+            'check_in_date': forms.DateInput(attrs={'type': 'date'}),
+            'check_out_date': forms.DateInput(attrs={'type': 'date'}),
         }
-
-    def clean(self):
-        cleaned_data = super().clean()
-        check_in = cleaned_data.get('check_in')
-        check_out = cleaned_data.get('check_out')
-
-        if check_in and check_out:
-            if check_in < timezone.now().date():
-                raise ValidationError("The check-in date cannot be in the past.")
-            if check_out <= check_in:
-                raise ValidationError("The departure date must be after the arrival date.")
-
-        return cleaned_data

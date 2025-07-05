@@ -1,3 +1,4 @@
+from django.contrib import admin
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
@@ -39,21 +40,32 @@ class Room(models.Model):
     def __str__(self):
         return  f"{self.get_room_type_display()} #{self.room_number} at {self.hotel.name}"
 
+
 class Booking(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Очікує підтвердження'),
+        ('confirmed', 'Підтверджено'),
+        ('cancelled', 'Скасовано'),
+        ('completed', 'Завершено'),
+    ]
+
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    room = models.ForeignKey(Room, on_delete=models.CASCADE)
-    check_in = models.DateField()
-    check_out = models.DateField()
-    adults = models.PositiveSmallIntegerField(default=1)
-    children = models.PositiveSmallIntegerField(default=0)
-    is_confirmed = models.BooleanField(default=False)
+    room = models.ForeignKey('Room', on_delete=models.CASCADE)
+    check_in_date = models.DateField()
+    check_out_date = models.DateField()
+    # Видаліть рядок з guests
+    total_price = models.DecimalField(max_digits=10, decimal_places=2)
+    status = models.CharField(
+        max_length=10,
+        choices=STATUS_CHOICES,
+        default='pending'
+    )
     created_at = models.DateTimeField(auto_now_add=True)
-    special_requests = models.TextField(blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"Booking #{self.id} for {self.user.username}"
+        return f"Бронювання #{self.id} - {self.get_status_display()}"
 
-    @property
-    def total_price(self):
-        nights = (self.check_out - self.check_in).days
-        return nights * self.room.price_per_night
+    @admin.display(boolean=True, description='Підтверджено?')
+    def is_confirmed(self):
+        return self.status == 'confirmed'

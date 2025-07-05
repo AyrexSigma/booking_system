@@ -1,9 +1,11 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 from .models import Hotel, Room, Booking
 from .forms import BookingForm
 from django.shortcuts import render
+
 
 def hotel_list(request):
     """View for hotels list"""
@@ -48,3 +50,25 @@ def my_bookings(request):
     """Сторінка з бронюваннями поточного користувача"""
     bookings = Booking.objects.filter(user=request.user)
     return render(request, 'hotels/my_bookings.html', {'bookings': bookings})
+
+@login_required
+def booking_detail(request, pk):
+    """Детальна інформація про конкретне бронювання"""
+    booking = get_object_or_404(Booking, pk=pk, user=request.user)
+    return render(request, 'hotels/booking_detail.html', {'booking': booking})
+
+
+@require_POST
+@login_required
+def cancel_booking(request, pk):
+    """Скасування бронювання"""
+    booking = get_object_or_404(Booking, pk=pk, user=request.user)
+
+    if booking.can_be_cancelled():
+        booking.status = 'cancelled'
+        booking.save()
+        messages.success(request, 'Бронювання успішно скасовано!')
+    else:
+        messages.error(request, 'Не вдалося скасувати бронювання. Можливо, вже пізно для скасування.')
+
+    return redirect('hotels:my_bookings')
