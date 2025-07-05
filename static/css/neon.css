@@ -1,0 +1,152 @@
+:root {
+  --neon-pink: #ff2a6d;
+  --neon-blue: #05d9e8;
+  --dark-bg: #0d0221;
+  --glass-bg: rgba(255, 255, 255, 0.08);
+}
+
+/* Базовые стили */
+body.dark-theme {
+    background-color: var(--dark-bg);
+    color: #fff;
+    font-family: 'Montserrat', sans-serif;
+    overflow-x: hidden;
+}
+
+body {
+  background: var(--dark-bg);
+  color: white;
+  font-family: 'Montserrat', sans-serif;
+}
+
+/* Анимированный бэкграунд */
+.bg-animation {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    overflow: hidden;
+}
+
+.gradient-circle {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.3;
+}
+
+.gradient-circle.pink {
+    background: var(--neon-pink);
+    width: 500px;
+    height: 500px;
+    top: -200px;
+    left: -200px;
+    animation: float 15s infinite alternate;
+}
+
+.gradient-circle.blue {
+    background: var(--neon-blue);
+    width: 600px;
+    height: 600px;
+    bottom: -200px;
+    right: -200px;
+    animation: float 18s infinite alternate-reverse;
+}
+
+/* Навигация */
+.glass-nav {
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 1.5rem 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.brand-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 500;
+    text-decoration: none;
+    color: white;
+}
+
+.neon-text {
+    background: linear-gradient(45deg, var(--neon-pink), var(--neon-purple));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: 0 0 10px rgba(255, 42, 109, 0.3);
+}
+
+/* Кнопки и эффекты */
+.neon-btn {
+    background: none;
+    color: white;
+    border: 2px solid var(--neon-blue);
+    padding: 0.5rem 1.5rem;
+    border-radius: 50px;
+    font-weight: 600;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s;
+}
+
+.neon-btn:hover {
+    box-shadow: 0 0 15px var(--neon-blue), 0 0 30px rgba(5, 217, 232, 0.2);
+    transform: translateY(-3px);
+}
+
+.glow-on-hover {
+    position: relative;
+}
+
+.glow-on-hover:after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--neon-pink);
+    transition: width 0.3s;
+}
+
+.glow-on-hover:hover:after {
+    width: 100%;
+}
+
+/* Карточки */
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.glass-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+}
+
+/* Анимации */
+@keyframes float {
+    0% { transform: translate(0, 0); }
+    50% { transform: translate(50px, 50px); }
+    100% { transform: translate(-50px, -50px); }
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .glass-nav {
+        padding: 1rem 0;
+    }
+
+    .brand-logo {
+        font-size: 1.5rem;
+    }
+}

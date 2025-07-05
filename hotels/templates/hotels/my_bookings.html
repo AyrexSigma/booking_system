@@ -1,32 +1,168 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Мої бронювання{% endblock %}
 
 {% block content %}
-<h1>My bookings</h1>
+<div class="container py-5 animate-fade">
+    <div class="row mb-5">
+        <div class="col-12">
+            <h1 class="section-title">Мої бронювання</h1>
 
-{% if bookings %}
-<table class="bookings-table">
-    <thead>
-        <tr>
-            <th>Hotel</th>
-            <th>Room</th>
-            <th>Check-in date</th>
-            <th>Check-out date</th>
-            <th>Status</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for booking in bookings %}
-        <tr>
-            <td>{{ booking.room.hotel.name }}</td>
-            <td>{{ booking.room.get_room_type_display }} #{{ booking.room.room_number }}</td>
-            <td>{{ booking.check_in }}</td>
-            <td>{{ booking.check_out }}</td>
-            <td>{% if booking.is_confirmed %}Confirmed{% else %}Awaiting confirmation{% endif %}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-{% else %}
-<p>You have no active bookings.</p>
-{% endif %}
+            <!-- Фильтры бронирований -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <form class="row g-3">
+                        <div class="col-md-4">
+                            <label for="status" class="form-label">Статус</label>
+                            <select class="form-select" id="status">
+                                <option selected>Всі</option>
+                                <option>Підтверджені</option>
+                                <option>Очікують</option>
+                                <option>Скасовані</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="date" class="form-label">Дата заїзду</label>
+                            <input type="date" class="form-control" id="date">
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-funnel me-1"></i> Фільтрувати
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            {% if bookings %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Готель</th>
+                            <th>Номер</th>
+                            <th>Дата заїзду</th>
+                            <th>Дата виїзду</th>
+                            <th>Статус</th>
+                            <th>Ціна</th>
+                            <th>Дії</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for booking in bookings %}
+                        <tr class="{% if booking.status == 'canceled' %}text-muted{% endif %}">
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <img src="{{ booking.room.hotel.image.url }}"
+                                         class="rounded me-3"
+                                         width="60"
+                                         height="60"
+                                         alt="{{ booking.room.hotel.name }}">
+                                    <div>
+                                        <h6 class="mb-0">{{ booking.room.hotel.name }}</h6>
+                                        <small class="text-muted">{{ booking.room.hotel.address }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                {{ booking.room.get_room_type_display }}
+                                <small class="d-block text-muted">№{{ booking.room.room_number }}</small>
+                            </td>
+                            <td>{{ booking.check_in|date:"d.m.Y" }}</td>
+                            <td>{{ booking.check_out|date:"d.m.Y" }}</td>
+                            <td>
+                                {% if booking.status == 'confirmed' %}
+                                <span class="badge bg-success">
+                                    <i class="bi bi-check-circle me-1"></i> Підтверджено
+                                </span>
+                                {% elif booking.status == 'pending' %}
+                                <span class="badge bg-warning text-dark">
+                                    <i class="bi bi-hourglass me-1"></i> Очікує
+                                </span>
+                                {% else %}
+                                <span class="badge bg-secondary">
+                                    <i class="bi bi-x-circle me-1"></i> Скасовано
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td class="fw-bold">{{ booking.total_price }} ₴</td>
+                            <td>
+                                <div class="d-flex gap-2">
+                                    <a href="{% url 'hotels:booking_detail' booking.id %}"
+                                       class="btn btn-sm btn-outline-primary"
+                                       data-bs-toggle="tooltip"
+                                       title="Деталі">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    {% if booking.status == 'pending' %}
+                                    <button class="btn btn-sm btn-outline-danger"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#cancelModal{{ booking.id }}"
+                                            title="Скасувати">
+                                        <i class="bi bi-x-lg"></i>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Модальное окно отмены -->
+                        <div class="modal fade" id="cancelModal{{ booking.id }}" tabindex="-1">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Скасування бронювання</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p>Ви впевнені, що хочете скасувати бронювання в
+                                        <strong>{{ booking.room.hotel.name }}</strong> з
+                                        {{ booking.check_in|date:"d.m.Y" }} по {{ booking.check_out|date:"d.m.Y" }}?</p>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрити</button>
+                                        <form action="{% url 'hotels:cancel_booking' booking.id %}" method="post">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-danger">Скасувати бронювання</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="card shadow-sm text-center py-5">
+                <div class="card-body">
+                    <i class="bi bi-journal-x fs-1 text-muted mb-3"></i>
+                    <h3 class="h5">У вас немає бронювань</h3>
+                    <p class="text-muted mb-4">Знайдіть ідеальний готель для вашого відпочинку</p>
+                    <a href="{% url 'hotels:hotel_list' %}" class="btn btn-primary">
+                        <i class="bi bi-search me-1"></i> Пошук готелів
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Активация всплывающих подсказок
+    document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+    })
+</script>
 {% endblock %}

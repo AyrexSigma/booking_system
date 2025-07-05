@@ -1,57 +1,209 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ room.hotel.name }} - {{ room.get_room_type_display }}{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-md-8">
-        <div class="card mb-4">
-            <div class="card-body">
-                <h1 class="card-title">{{ room.hotel.name }} - {{ room.get_room_type_display }}</h1>
-                <div class="star-rating mb-3">
-                    {% for i in "12345" %}
-                        {% if forloop.counter <= room.hotel.stars %}★{% else %}☆{% endif %}
+<div class="container py-5 animate-fade">
+    <!-- Хлебные крошки -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'hotels:hotel_list' %}">Готелі</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'hotels:hotel_detail' room.hotel.id %}">{{ room.hotel.name }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ room.get_room_type_display }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Галерея фотографий номера -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body p-0">
+                    <div class="ratio ratio-16x9">
+                        <img src="{% if room.image %}{{ room.image.url }}{% else %}{% static 'images/room-placeholder.jpg' %}{% endif %}"
+                             class="rounded-top object-fit-cover"
+                             alt="{{ room.get_room_type_display }}">
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h2 class="h4 mb-3">{{ room.get_room_type_display }} №{{ room.room_number }}</h2>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h3 class="h5 mb-3">Зручності:</h3>
+                            <div class="row">
+                                {% for feature in room.features_as_list %}
+                                <div class="col-6 mb-2">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                        <span>{{ feature }}</span>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h3 class="h5 mb-3">Додатково:</h3>
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <i class="bi bi-people-fill text-primary me-2"></i>
+                                    <strong>Місткість:</strong> {{ room.capacity }} особи
+                                </li>
+                                <li class="mb-2">
+                                    <i class="bi bi-door-open text-primary me-2"></i>
+                                    <strong>Площа:</strong> {{ room.size }} м²
+                                </li>
+                                <li class="mb-2">
+                                    <i class="bi bi-wifi text-primary me-2"></i>
+                                    <strong>Wi-Fi:</strong> {% if room.has_wifi %}Так{% else %}Ні{% endif %}
+                                </li>
+                                <li>
+                                    <i class="bi bi-tv text-primary me-2"></i>
+                                    <strong>TV:</strong> {% if room.has_tv %}Так{% else %}Ні{% endif %}
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <h3 class="h5 mb-3">Опис:</h3>
+                    <p>{{ room.description }}</p>
+                </div>
+            </div>
+
+            <!-- Отзывы -->
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h3 class="h5 mb-4">
+                        <i class="bi bi-star-fill text-warning me-1"></i>
+                        Відгуки ({{ room.reviews.count }})
+                    </h3>
+
+                    {% for review in room.reviews.all|slice:":3" %}
+                    <div class="mb-4 pb-3 border-bottom">
+                        <div class="d-flex justify-content-between mb-2">
+                            <div>
+                                <strong>{{ review.user.username }}</strong>
+                                <div class="star-rating small">
+                                    {% for i in "12345" %}
+                                        {% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <small class="text-muted">{{ review.created_at|date:"d.m.Y" }}</small>
+                        </div>
+                        <p>{{ review.comment }}</p>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-3">
+                        <p class="text-muted">Ще немає відгуків про цей номер</p>
+                    </div>
                     {% endfor %}
-                </div>
 
-                <div class="row mb-4">
-                    <div class="col-md-6">
-                        <p><strong>Room Number:</strong> {{ room.room_number }}</p>
-                        <p><strong>Capacity:</strong> {{ room.capacity }} persons</p>
+                    {% if room.reviews.count > 3 %}
+                    <div class="text-center mt-3">
+                        <a href="#" class="btn btn-outline-primary">
+                            Показати всі відгуки ({{ room.reviews.count }})
+                        </a>
                     </div>
-                    <div class="col-md-6">
-                        <p><strong>Price per night:</strong> ${{ room.price_per_night }}</p>
-                        <p><strong>Status:</strong>
-                            <span class="badge bg-{% if room.is_available %}success{% else %}danger{% endif %}">
-                                {% if room.is_available %}Available{% else %}Booked{% endif %}
-                            </span>
-                        </p>
-                    </div>
+                    {% endif %}
                 </div>
-
-                <h4>Features:</h4>
-                <p>{{ room.features }}</p>
             </div>
         </div>
-    </div>
 
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-header bg-primary text-white">
-                <h3 class="mb-0">Book This Room</h3>
-            </div>
-            <div class="card-body">
-                {% if user.is_authenticated %}
-                <form method="post">
-                    {% csrf_token %}
-                    {{ form.as_p }}
-                    <button type="submit" class="btn btn-primary w-100 mt-3">Confirm Booking</button>
-                </form>
-                {% else %}
-                <div class="alert alert-info">
-                    Please <a href="{% url 'admin:login' %}?next={{ request.path }}">login</a> to book this room.
+        <!-- Блок бронирования -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm sticky-top" style="top: 20px;">
+                <div class="card-body">
+                    <h3 class="h4 mb-4 text-center">Забронювати номер</h3>
+
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <span class="fs-4 fw-bold text-primary">{{ room.price_per_night }} ₴</span>
+                            <span class="text-muted"> / ніч</span>
+                        </div>
+                        <div class="star-rating">
+                            {% for i in "12345" %}
+                                {% if forloop.counter <= room.hotel.stars %}★{% else %}☆{% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    {% if user.is_authenticated %}
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <label for="check_in" class="form-label">Дата заїзду</label>
+                            <input type="date" class="form-control" id="check_in" name="check_in" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="check_out" class="form-label">Дата виїзду</label>
+                            <input type="date" class="form-control" id="check_out" name="check_out" required>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 py-2">
+                            <i class="bi bi-calendar-check me-1"></i> Забронювати
+                        </button>
+                    </form>
+                    {% else %}
+                    <div class="alert alert-info">
+                        <p class="mb-3">Для бронювання необхідно увійти в систему</p>
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'users:login' %}?next={{ request.path }}" class="btn btn-primary">
+                                Увійти
+                            </a>
+                            <a href="{% url 'users:register' %}" class="btn btn-outline-primary">
+                                Зареєструватися
+                            </a>
+                        </div>
+                    </div>
+                    {% endif %}
                 </div>
-                {% endif %}
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .star-rating {
+        color: var(--secondary);
+        letter-spacing: 2px;
+    }
+
+    .star-rating.small {
+        font-size: 0.9rem;
+    }
+
+    .object-fit-cover {
+        object-fit: cover;
+    }
+
+    .guests-select option {
+        padding: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Инициализация календаря
+    document.addEventListener('DOMContentLoaded', function() {
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('check_in').min = today;
+
+        document.getElementById('check_in').addEventListener('change', function() {
+            const checkOut = document.getElementById('check_out');
+            checkOut.min = this.value;
+            if (checkOut.value && checkOut.value < this.value) {
+                checkOut.value = '';
+            }
+        });
+    });
+</script>
 {% endblock %}

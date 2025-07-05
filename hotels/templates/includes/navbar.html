@@ -1,20 +1,33 @@
 <ul class="navbar-nav ms-auto">
     {% if user.is_authenticated %}
-    <li class="nav-item">
-        <span class="navbar-text me-2">Hello, {{ user.username }}</span>
+    <li class="nav-item me-3">
+        <span class="navbar-text text-neon me-2">Привіт, {{ user.username }}!</span>
+    </li>
+    <li class="nav-item me-2">
+        <a class="btn btn-neon btn-sm" href="{% url 'hotels:hotel_list' %}">
+            <i class="fas fa-hotel me-1"></i>Готелі
+        </a>
+    </li>
+    <li class="nav-item me-2">
+        <a class="btn btn-neon btn-sm" href="{% url 'users:profile' %}">
+            <i class="fas fa-user-cog me-1"></i>Профіль
+        </a>
     </li>
     <li class="nav-item">
-        <a class="nav-link" href="{% url 'users:profile' %}">Profile</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'users:logout' %}">Logout</a>
+        <a class="btn btn-neon btn-pink btn-sm" href="{% url 'users:logout' %}">
+            <i class="fas fa-sign-out-alt me-1"></i>Вийти
+        </a>
     </li>
     {% else %}
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'users:login' %}">Login</a>
+    <li class="nav-item me-2">
+        <a class="btn btn-neon btn-sm" href="{% url 'users:login' %}">
+            <i class="fas fa-sign-in-alt me-1"></i>Увійти
+        </a>
     </li>
     <li class="nav-item">
-        <a class="nav-link" href="{% url 'users:register' %}">Register</a>
+        <a class="btn btn-neon btn-pink btn-sm" href="{% url 'users:register' %}">
+            <i class="fas fa-user-plus me-1"></i>Реєстрація
+        </a>
     </li>
     {% endif %}
 </ul>

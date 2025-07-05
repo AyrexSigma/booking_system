@@ -3,6 +3,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from .models import Hotel, Room, Booking
 from .forms import BookingForm
+from django.shortcuts import render
 
 def hotel_list(request):
     """View for hotels list"""
@@ -29,6 +30,18 @@ def room_detail(request, room_id):
         'room': room,
         'form': form
     })
+
+def hotel_detail(request, pk):
+    """Страница с подробной информацией об отеле"""
+    hotel = get_object_or_404(Hotel, pk=pk)
+    rooms = Room.objects.filter(hotel=hotel)  # Получаем все номера этого отеля
+    return render(request, 'hotels/hotel_detail.html', {
+        'hotel': hotel,
+        'rooms': rooms
+    })
+def home_view(request):
+    return render(request, 'home.html')
+
 
 @login_required
 def my_bookings(request):

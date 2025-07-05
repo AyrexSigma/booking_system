@@ -1,19 +1,184 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Номери в готелі {{ hotel.name }}{% endblock %}
 
 {% block content %}
-<h1>Rooms at {{ rooms.0.hotel.name }}</h1>
-<ul>
-    {% for room in rooms %}
-    <li>
-        <h2>{{ room.get_room_type_display }} #{{ room.room_number }}</h2>
-        <p>Capacity: {{ room.capacity }}</p>
-        <p>Price per night: ${{ room.price_per_night }}</p>
-        {% if room.is_available %}
-            <p style="color: green;">Available</p>
-        {% else %}
-            <p style="color: red;">Not Available</p>
-        {% endif %}
-    </li>
-    {% endfor %}
-</ul>
+<div class="container py-5 animate-fade">
+    <!-- Хлебные крошки -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'hotels:hotel_list' %}">Готелі</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ hotel.name }}</li>
+        </ol>
+    </nav>
+
+    <!-- Заголовок и информация об отеле -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h1 class="mb-2">{{ hotel.name }}</h1>
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="star-rating me-3">
+                            {% for i in "12345" %}
+                                {% if forloop.counter <= hotel.stars %}★{% else %}☆{% endif %}
+                            {% endfor %}
+                        </div>
+                        <span class="text-muted">
+                            <i class="bi bi-geo-alt-fill me-1"></i>{{ hotel.address }}
+                        </span>
+                    </div>
+                </div>
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="sortDropdown" data-bs-toggle="dropdown">
+                        <i class="bi bi-sort-down me-1"></i>Сортувати
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="?sort=price_asc">Від дешевих до дорогих</a></li>
+                        <li><a class="dropdown-item" href="?sort=price_desc">Від дорогих до дешевих</a></li>
+                        <li><a class="dropdown-item" href="?sort=capacity">За місткістю</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Фильтры номеров -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <form class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label">Тип номера</label>
+                            <select class="form-select" name="room_type">
+                                <option value="">Всі</option>
+                                <option value="STD">Стандарт</option>
+                                <option value="DLX">Напівлюкс</option>
+                                <option value="SUITE">Люкс</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Ціна за ніч</label>
+                            <select class="form-select" name="price_range">
+                                <option value="">Будь-яка</option>
+                                <option value="0-1000">До 1000 ₴</option>
+                                <option value="1000-2000">1000-2000 ₴</option>
+                                <option value="2000-5000">2000-5000 ₴</option>
+                                <option value="5000-">Від 5000 ₴</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Місткість</label>
+                            <select class="form-select" name="capacity">
+                                <option value="">Будь-яка</option>
+                                <option value="1">1 особа</option>
+                                <option value="2">2 особи</option>
+                                <option value="3">3 особи</option>
+                                <option value="4+">4+ осіб</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-funnel me-1"></i> Фільтрувати
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Список номеров -->
+    <div class="row g-4">
+        {% for room in rooms %}
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100">
+                <div class="row g-0 h-100">
+                    <div class="col-md-5">
+                        <img src="{% if room.image %}{{ room.image.url }}{% else %}{% static 'images/room-placeholder.jpg' %}{% endif %}"
+                             class="img-fluid rounded-start h-100 object-fit-cover"
+                             alt="{{ room.get_room_type_display }}">
+                    </div>
+                    <div class="col-md-7">
+                        <div class="card-body d-flex flex-column h-100">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h3 class="h5 mb-0">{{ room.get_room_type_display }} №{{ room.room_number }}</h3>
+                                <span class="badge bg-primary">{{ room.size }} м²</span>
+                            </div>
+
+                            <div class="mb-3">
+                                <span class="fw-bold fs-5 text-primary">{{ room.price_per_night }} ₴</span>
+                                <span class="text-muted"> / ніч</span>
+                            </div>
+
+                            <ul class="list-unstyled mb-4">
+                                <li class="mb-2">
+                                    <i class="bi bi-people-fill text-primary me-2"></i>
+                                    <strong>Місткість:</strong> {{ room.capacity }} особи
+                                </li>
+                                <li class="mb-2">
+                                    <i class="bi bi-wifi text-primary me-2"></i>
+                                    <strong>Wi-Fi:</strong> {% if room.has_wifi %}Так{% else %}Ні{% endif %}
+                                </li>
+                                <li>
+                                    <i class="bi bi-tv text-primary me-2"></i>
+                                    <strong>TV:</strong> {% if room.has_tv %}Так{% else %}Ні{% endif %}
+                                </li>
+                            </ul>
+
+                            <div class="mt-auto">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <a href="{% url 'hotels:room_detail' room.id %}" class="btn btn-outline-primary">
+                                        <i class="bi bi-eye me-1"></i> Деталі
+                                    </a>
+                                    {% if user.is_authenticated %}
+                                    <a href="{% url 'hotels:room_detail' room.id %}" class="btn btn-primary">
+                                        <i class="bi bi-calendar-check me-1"></i> Бронювати
+                                    </a>
+                                    {% else %}
+                                    <a href="{% url 'users:login' %}?next={% url 'hotels:room_detail' room.id %}" class="btn btn-primary">
+                                        <i class="bi bi-box-arrow-in-right me-1"></i> Увійти для бронювання
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% empty %}
+        <div class="col-12">
+            <div class="card shadow-sm text-center py-5">
+                <div class="card-body">
+                    <i class="bi bi-door-closed fs-1 text-muted mb-3"></i>
+                    <h3 class="h5">Номери не знайдені</h3>
+                    <p class="text-muted">Спробуйте змінити параметри пошуку</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .object-fit-cover {
+        object-fit: cover;
+    }
+
+    .star-rating {
+        color: var(--secondary);
+        letter-spacing: 2px;
+    }
+
+    .card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+    }
+</style>
 {% endblock %}

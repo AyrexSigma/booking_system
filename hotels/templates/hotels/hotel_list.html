@@ -1,32 +1,103 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    .hotel-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 2rem;
+        margin: 3rem 0;
+    }
+
+    .hotel-card {
+        position: relative;
+        overflow: hidden;
+        border-radius: 15px;
+        height: 400px;
+        transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .hotel-card img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 1s;
+    }
+
+    .hotel-card:hover img {
+        transform: scale(1.1);
+    }
+
+    .hotel-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(to top, rgba(13, 2, 33, 0.9), transparent);
+        padding: 2rem;
+        color: white;
+    }
+
+    .hotel-rating {
+        color: var(--neon-blue);
+        font-size: 1.2rem;
+        letter-spacing: 3px;
+    }
+
+    .price-tag {
+        background: var(--neon-pink);
+        color: white;
+        padding: 0.5rem 1.5rem;
+        border-radius: 50px;
+        font-weight: 700;
+        display: inline-block;
+        box-shadow: 0 0 15px rgba(255, 42, 109, 0.5);
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="row">
-    <h1 class="mb-4">Available Hotels</h1>
+<div class="container">
+    <h1 class="page-title neon-text">Преміум <span>готелі</span></h1>
+    <p class="subtitle">Оберіть найкращий варіант для вашого відпочинку</p>
 
-    {% for hotel in hotels %}
-    <div class="col-md-4 mb-4">
-        <div class="card h-100">
-            <img src="https://via.placeholder.com/300x200?text={{ hotel.name }}" class="card-img-top" alt="{{ hotel.name }}">
-            <div class="card-body">
-                <h5 class="card-title">{{ hotel.name }}</h5>
-                <div class="mb-2">
-                    {% for i in "12345" %}
-                        {% if forloop.counter <= hotel.stars %}★{% else %}☆{% endif %}
-                    {% endfor %}
+    <div class="hotel-grid">
+        {% for hotel in hotels %}
+        <a href="{% url 'hotels:hotel_detail' hotel.id %}" class="hotel-card glass-card">
+            <img src="{% if hotel.image %}{{ hotel.image.url }}{% else %}{% static 'images/hotel-neon.jpg' %}{% endif %}" alt="{{ hotel.name }}">
+
+            <div class="hotel-overlay">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h3>{{ hotel.name }}</h3>
+                        <p><i class="fas fa-map-marker-alt"></i> {{ hotel.address }}</p>
+                    </div>
+                    <div class="hotel-rating">
+                        {% for i in "12345" %}
+                            {% if forloop.counter <= hotel.stars %}★{% else %}☆{% endif %}
+                        {% endfor %}
+                    </div>
                 </div>
-                <p class="card-text">{{ hotel.description|truncatewords:20 }}</p>
 
-                {% if hotel.rooms.first %}
-                    <a href="{% url 'hotels:room_detail' hotel.rooms.first.id %}" class="btn btn-primary">
-                        View Rooms
-                    </a>
-                {% else %}
-                    <a class="btn btn-secondary disabled" aria-disabled="true">No Rooms</a>
+                <div class="d-flex justify-content-between align-items-end mt-3">
+                    <div class="amenities">
+                        {% if hotel.has_pool %}<span class="amenity-icon"><i class="fas fa-swimming-pool"></i></span>{% endif %}
+                        {% if hotel.has_spa %}<span class="amenity-icon"><i class="fas fa-spa"></i></span>{% endif %}
+                    </div>
+                    <div class="price-tag">
+                        від {{ hotel.min_price }} ₴
+                    </div>
+                </div>
+            </div>
+
+            <div class="hotel-badge">
+                {% if hotel.is_recommended %}
+                <span class="neon-badge">ТОП ВИБІР</span>
                 {% endif %}
             </div>
-        </div>
+        </a>
+        {% endfor %}
     </div>
-    {% endfor %}
 </div>
 {% endblock %}
