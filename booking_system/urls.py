@@ -17,7 +17,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+app_name = 'hotels'
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('hotels.urls')),  # Включення URL-шляхів з hotels
+    path('auth/', include('users.urls')),
 ]

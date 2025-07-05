@@ -4,7 +4,6 @@ from django.contrib.auth.decorators import login_required
 from .models import Hotel, Room, Booking
 from .forms import BookingForm
 
-# Create your views here.
 def hotel_list(request):
     """View for hotels list"""
     hotels = Hotel.objects.all().order_by('stars')
@@ -22,7 +21,7 @@ def room_detail(request, room_id):
             booking.user = request.user
             booking.save()
             messages.success(request, 'The booking has been successfully created!')
-            return redirect('my_bookings')
+            return redirect('hotels:my_bookings')  # Исправлено с namespace
     else:
         form = BookingForm()
 
@@ -33,6 +32,6 @@ def room_detail(request, room_id):
 
 @login_required
 def my_bookings(request):
-    """View for user booking overview"""
-    bookings = Booking.objects.filter(user=request.user).order_by('-created_at')
+    """Сторінка з бронюваннями поточного користувача"""
+    bookings = Booking.objects.filter(user=request.user)
     return render(request, 'hotels/my_bookings.html', {'bookings': bookings})

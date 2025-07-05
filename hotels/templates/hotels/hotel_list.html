@@ -16,9 +16,14 @@
                     {% endfor %}
                 </div>
                 <p class="card-text">{{ hotel.description|truncatewords:20 }}</p>
-                <a href="{% url 'hotels:room_detail' hotel.rooms.first.id %}" class="btn btn-primary">
-                    View Rooms
-                </a>
+
+                {% if hotel.rooms.first %}
+                    <a href="{% url 'hotels:room_detail' hotel.rooms.first.id %}" class="btn btn-primary">
+                        View Rooms
+                    </a>
+                {% else %}
+                    <a class="btn btn-secondary disabled" aria-disabled="true">No Rooms</a>
+                {% endif %}
             </div>
         </div>
     </div>
