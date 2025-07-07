@@ -3,6 +3,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.conf import settings
+from django.utils import timezone
 
 # Create your models here.
 class Hotel(models.Model):
@@ -46,14 +47,17 @@ class Booking(models.Model):
         ('pending', 'Очікує підтвердження'),
         ('confirmed', 'Підтверджено'),
         ('cancelled', 'Скасовано'),
-        ('completed', 'Завершено'),
     ]
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     room = models.ForeignKey('Room', on_delete=models.CASCADE)
-    check_in_date = models.DateField()
-    check_out_date = models.DateField()
-    total_price = models.DecimalField(max_digits=10, decimal_places=2)
+    check_in = models.DateField()
+    check_out = models.DateField()
+    total_price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0.00
+    )
     status = models.CharField(
         max_length=10,
         choices=STATUS_CHOICES,
@@ -63,7 +67,10 @@ class Booking(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"Бронювання #{self.id} - {self.get_status_display()}"
+        return f"Бронювання #{self.id}"
+
+    def can_be_cancelled(self):
+        return self.status == 'pending' and self.check_in > timezone.now().date()
 
     @admin.display(boolean=True, description='Підтверджено?')
     def is_confirmed(self):

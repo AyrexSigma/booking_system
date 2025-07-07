@@ -134,16 +134,7 @@
                     {% if user.is_authenticated %}
                     <form method="post">
                         {% csrf_token %}
-
-                        <div class="mb-3">
-                            <label for="check_in" class="form-label">Дата заїзду</label>
-                            <input type="date" class="form-control" id="check_in" name="check_in" required>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="check_out" class="form-label">Дата виїзду</label>
-                            <input type="date" class="form-control" id="check_out" name="check_out" required>
-                        </div>
+                        {{form}}
 
                         <button type="submit" class="btn btn-primary w-100 py-2">
                             <i class="bi bi-calendar-check me-1"></i> Забронювати

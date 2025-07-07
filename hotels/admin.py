@@ -17,10 +17,10 @@ class RoomAdmin(admin.ModelAdmin):
 
 @admin.register(Booking)
 class BookingAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'room', 'check_in_date', 'check_out_date', 'status', 'is_confirmed_display')
-    list_filter = ('status', 'check_in_date', 'check_out_date')
+    list_display = ('id', 'user', 'room', 'check_in', 'check_out', 'status', 'is_confirmed_display')
+    list_filter = ('status', 'check_in', 'check_out')
     search_fields = ('user__username', 'room__room_number')
-    date_hierarchy = 'check_in_date'
+    date_hierarchy = 'check_in'
 
     @admin.display(boolean=True, description='Підтверджено?')
     def is_confirmed_display(self, obj):

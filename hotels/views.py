@@ -5,6 +5,7 @@ from django.views.decorators.http import require_POST
 from .models import Hotel, Room, Booking
 from .forms import BookingForm
 from django.shortcuts import render
+from decimal import Decimal
 
 
 def hotel_list(request):
@@ -12,8 +13,9 @@ def hotel_list(request):
     hotels = Hotel.objects.all().order_by('stars')
     return render(request, 'hotels/hotel_list.html', {'hotels': hotels})
 
+@login_required
 def room_detail(request, room_id):
-    """View for the room details with the booking form"""
+    """View для страницы деталей номера и бронирования"""
     room = get_object_or_404(Room, id=room_id)
 
     if request.method == 'POST':
@@ -22,9 +24,12 @@ def room_detail(request, room_id):
             booking = form.save(commit=False)
             booking.room = room
             booking.user = request.user
-            booking.save()
-            messages.success(request, 'The booking has been successfully created!')
-            return redirect('hotels:my_bookings')  # Исправлено с namespace
+
+            nights = (booking.check_out - booking.check_in).days
+            booking.total_price = Decimal(room.price_per_night) * nights
+
+            booking.save()  # Теперь сохраняем
+            return redirect('hotels:my_bookings')
     else:
         form = BookingForm()
 
